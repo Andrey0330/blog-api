@@ -12,15 +12,25 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Переменные окружения
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+env_file = BASE_DIR / '.env'
+# чтение из файла .env
+environ.Env.read_env(env_file)
+# конец
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ae33vd&8vmhb$$z-r2!3fx*^3i)=h*g3f#y8j6&o94ndnsukzu'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,6 +48,10 @@ DJANGO_APPS = (
 )
 THIRD_PARTY_APPS = (
     'rest_framework',
+    'ckeditor',
+    'ckeditor_uploader',
+    'taggit',
+    'taggit_serializer',
 )
 LOCAL_APPS = (
     'core.apps.CoreConfig',
@@ -140,10 +154,51 @@ SIMPLE_JWT = {
 CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
 # конец настроек JWT токена
 
-#настройки rest framework
+# настройки rest framework
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework_simplejwt.authentication.JWTAuthentication"],
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.DjangoModelPermissions",),
+    "SEARCH_PARAM": "q"
 }
+# конец настройки rest framework
+
+####################################
+##  CKEDITOR CONFIGURATION ##
+####################################
+
+CKEDITOR_JQUERY_URL = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js'
+
+CKEDITOR_UPLOAD_PATH = 'uploads/'
+CKEDITOR_IMAGE_BACKEND = "pillow"
+CKEDITOR_CONFIGS = {
+    "default": {
+        "removePlugins": "stylesheetparser",
+        'allowedContent': True,
+        'toolbar_Full': [
+            ['Styles', 'Format', 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-',
+             'RemoveFormat'],
+            ['Image', 'Flash', 'Table', 'HorizontalRule'],
+            ['TextColor', 'BGColor'],
+            ['Smiley', 'sourcearea', 'SpecialChar'],
+            ['Link', 'Unlink', 'Anchor'],
+            ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-',
+             'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl', 'Language'],
+            ['Source', '-', 'Save', 'NewPage', 'Preview', 'Print', '-', 'Templates'],
+            ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo'],
+            ['Find', 'Replace', '-', 'SelectAll', '-', 'Scayt'],
+            ['Maximize', 'ShowBlocks']
+        ],
+    }
+}
+
+###################################
+
+# mail
+EMAIL_BACKEND = env('EMAIL_BACKEND')
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
